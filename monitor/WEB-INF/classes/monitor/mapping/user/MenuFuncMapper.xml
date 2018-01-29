@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="monitor.dao.user.MenuFuncMapper">
+	<select id="selectMenuFunc" parameterType="monitor.pojo.user.MenuFunc" resultType="monitor.pojo.user.MenuFunc">
+		select id,dep,role,menu_id as menuId,user_id as userId from net_func where dep=#{dep} and role=#{role} and user_id=#{userId} 
+	</select>
+	<insert id="insertMenuFunc" parameterType="monitor.pojo.user.NetFunc">
+		insert into net_func(dep,role,menu_id,user_id) value (#{dep},#{role},#{menuId},#{userId})
+	</insert>
+
+
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="monitor.dao.net.NetInfoMapper">
+  
+  <resultMap type="monitor.pojo.net.NetInfo" id="listNetInfo">
+  	<id column="id" property="id"/>
+  	<result column="href" property="href"/>
+  	<result column="emp_name" property="empName"/>
+  	<result column="emp_emai" property="empEmai"/>
+  	<result column="create_time" property="createTime"/>
+  	<result column="cls" property="cls"/>
+  </resultMap>
+	
+	
+  <select id="selectNetInfo" parameterType="monitor.pojo.net.PageModel" resultMap="listNetInfo">
+  	select id,href,emp_emai,emp_name,create_time,cls from  net_info  where 1=1
+    <if test="queryObj.href !=null and queryObj.href!=''">
+    	and href like concat('%',#{queryObj.href},'%')
+    </if>
+    <if test="pageNumber != null and  pageSize!= null">
+    	limit #{startRow},#{pageSize}
+    </if>
+  </select>
+  
+  <select id="selectCountNetInfo" parameterType="String" resultType="java.lang.Integer">
+  	select count(0) from  net_info  where 1=1
+    <if test="href !=null and href!=''">
+    	and href like concat('%',#{href},'%')
+    </if>
+  </select>
+  
+  <insert id="insertNetInfo" parameterType="monitor.pojo.net.NetInfo">
+  	insert into net_info (href,create_time,emp_name,emp_emai,cls) values (#{href},#{createTime},#{empName},#{empEmai},#{cls})
+  </insert>
+  
+  <update id="updateNetInfo" parameterType="monitor.pojo.net.NetInfo">
+  	update net_info 
+  	<trim prefix="set" suffixOverrides=",">
+	  	<if test="empName!=null">emp_name=#{empName},</if>
+	  	<if test="empEmai!=null">emp_emai=#{empEmai},</if>
+	  	<if test="empEmai!=null">cls=#{cls}</if>
+  	</trim>
+  		<where>
+  			 href=#{href}
+  		</where>
+  </update>
+  
+  <delete id="deleteNetInfo" parameterType="string">
+  	delete from net_info where href=#{href}
+  </delete>
+  
+  
+</mapper>

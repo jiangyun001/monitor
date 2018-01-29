@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="monitor.dao.user.DeptMapper">
+	<select id="selectAllDept"  parameterType="monitor.pojo.user.Dept" resultType="monitor.pojo.user.Dept">
+			select dep_id as depId,role_id as roleId,dep_name as depName,role_name as roleName from net_dept
+	</select>
+	
+	<select id="selectMaxDeptNo" resultType="java.lang.Integer">
+			select max(dep_id) from net_dept
+	</select>
+	
+	<insert id="insertDept" parameterType="monitor.pojo.user.Dept" >
+		insert into net_dept(dep_id,role_id,dep_name,role_name) values (#{depId},#{roleId},#{depName},#{roleName})
+	</insert>
+	
+	<update id="updateDept" parameterType="monitor.pojo.user.Dept">
+		update net_dept set dep_name=#{depName},role_name=#{roleName} where dep_id=#{depId},role_id=#{roleId}
+	</update>
+	
+	<select id="getComboBox"  parameterType="monitor.pojo.user.Dept" resultType="monitor.pojo.user.ComboBox">
+		select distinct dep_id as id,dep_name as text from net_dept where 1=1
+		<if test="depId!=null and depId>0">
+			and dep_id=#{depId}
+		</if>
+		<if test="roleId!=null and roleId>0">
+			and role_id=#{depId}
+		</if>
+	</select>
+	
+</mapper>
+

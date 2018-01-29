@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="monitor.dao.net.NetWordMapper" >
+  <resultMap id="BaseResultMap" type="monitor.pojo.net.NetWord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="key_word" property="keyWord" jdbcType="VARCHAR" />
+    <!-- <result column="key_money" property="keyMoney" /> -->
+    <result column="user_money" property="userMoney" />
+    <result column="proxy_money" property="proxyMoney" />
+    <result column="net_address" property="netAddress" jdbcType="VARCHAR" />
+    <result column="word_team" property="wordTeam" jdbcType="VARCHAR" />
+    <result column="word_engin" property="wordEngin" jdbcType="VARCHAR" />
+    <result column="word_order" property="wordOrder" jdbcType="VARCHAR" />
+    <result column="word_custmer" property="wordCustmer" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="flag" property="flag" jdbcType="VARCHAR" />
+    <result column="target_order" property="targetOrder" jdbcType="VARCHAR" />
+    <result column="original_order" property="originalOrder" jdbcType="VARCHAR" />
+    <result column="dep_id" property="depId" jdbcType="VARCHAR" />
+    <result column="comfirm_time" property="comfirmTime" jdbcType="VARCHAR" />
+    <result column="role_id" property="roleId" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  
+  <sql id="Base_Column_List" >
+    id, key_word, user_money,proxy_money,target_order, net_address, word_team, word_engin, word_order, 
+    word_custmer, create_time,original_order,flag,dep_id,role_id,comfirm_time
+  </sql>
+  <sql id="condtionSql">
+  	  <if test="queryObj.keyWord != null" >
+        and key_word like concat('%',#{queryObj.keyWord},'%')
+      </if>
+      
+ 	  <if test="queryObj.flag != null and queryObj.flag!='all'" >
+       and substr(flag,1,3)=#{queryObj.flag}
+      </if>
+
+ 	  <if test="queryObj.createTime != null and queryObj.sort!='not'" >
+       and substr(create_time,1,8)=#{queryObj.createTime}
+      </if>
+      
+ 	  <if test="queryObj.comfirmTime != null and queryObj.sort!='not'" >
+       and substr(comfirm_time,1,8)=#{queryObj.comfirmTime}
+      </if>
+      
+ 	  <if test="queryObj.flagList != null">
+ 	  	and flag in
+       	<foreach collection="queryObj.flagList" item="flag" index="index" open="(" separator="," close=")">
+			#{flag}
+		</foreach>
+      </if>
+      
+ 	  <if test=" queryObj.roleId!=0"  >
+       and role_id=#{queryObj.roleId}
+      </if>
+      
+ 	  <if test="queryObj.depId!=0" >
+       and dep_id=#{queryObj.depId}
+      </if>
+      
+ 	  <if test="queryObj.wordCustmer != null" >
+       and word_custmer=#{queryObj.wordCustmer}
+      </if>
+      
+      <if test="queryObj.startData != null and queryObj.startData !='' and queryObj.endData!=null and queryObj.endData!=''">
+      	and substr(create_time,1,8) &gt;= replace(#{queryObj.startData},'-',"") and substr(create_time,1,8) &lt;=replace(#{queryObj.endData},'-',"")
+      </if>
+      <if test="queryObj.serachKey!=null and queryObj.serachKey!=''">
+        and (key_word like concat('%',#{queryObj.serachKey},'%') or net_address like concat('%',#{queryObj.serachKey},'%'))
+      </if>
+      <if test="queryObj.date!=null and queryObj.status!=null">
+      	and substr(create_time,1,8)=#{queryObj.date} and flag=#{queryObj.status}
+      </if>
+      
+    
+      <if test="queryObj.notFlg != null">
+    	and flag &lt;&gt; #{queryObj.notFlg} and net_address is not null
+      </if>
+      <if test="queryObj.serachFeild!=null">
+      	and (key_word like concat('%',#{queryObj.serachFeild},'%') or net_address like concat ('%',#{queryObj.serachFeild},'%'))
+      </if>
+      
+ 	  <if test="queryObj.sort == 'keyWord' and queryObj.order!=null" >
+       order by key_Word ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == 'netAddress' and queryObj.order!=null" >
+        order by net_address ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == 'wordTeam' and queryObj.order!=null" >
+        order by word_team ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == 'wordEngin' and queryObj.order!=null" >
+        order by word_engin ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == 'createTime' and queryObj.order!=null" >
+        order by create_time ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == 'originalOrder' and queryObj.order!=null" >
+        order by original_order ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == 'wordOrder' and queryObj.order!=null" >
+        order by word_order ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == 'flag' and queryObj.order!=null" >
+        order by flag ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == 'wordCustmer' and queryObj.order!=null" >
+        order by word_custmer ${queryObj.order} 
+      </if>
+ 	  <if test="queryObj.sort == null" >
+        order by create_time desc
+      </if>
+  </sql>
+  
+  <delete id="deleteWordUser" parameterType="String">
+  	delete from net_word where word_custmer=#{userId}
+  </delete>
+  
+  
+  <select id="selectCountWork" resultType="java.lang.Integer"  parameterType="monitor.pojo.net.PageModel">
+  	select count(0) as total from net_word where 1=1  
+ 	  <include refid="condtionSql" />
+  </select>
+   
+  <select id="selectPageWord" resultMap="BaseResultMap"  parameterType="monitor.pojo.net.PageModel">
+  	select <include refid="Base_Column_List" /> from net_word where 1=1 
+ 	  <include refid="condtionSql" />
+ 	  <if test="pageNumber != null and  pageSize!= null">
+   		limit #{startRow},#{pageSize}
+      </if>
+  </select>
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from net_word
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from net_word
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="monitor.pojo.net.NetWord" >
+    insert into net_word (id, key_word, 
+      user_money,proxy_money, net_address, word_team, 
+      word_engin, word_order, word_custmer, 
+      create_time)
+    values (#{id,jdbcType=INTEGER}, #{keyWord,jdbcType=VARCHAR}, 
+      #{userMoney,jdbcType=VARCHAR},#{proxyMoney,jdbcType=VARCHAR}, #{netAddress,jdbcType=VARCHAR}, #{wordTeam,jdbcType=VARCHAR}, 
+      #{wordEngin,jdbcType=VARCHAR}, #{wordOrder,jdbcType=VARCHAR}, #{wordCustmer,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR})
+  </insert>
+  
+  
+  <insert id="insertSelective" parameterType="monitor.pojo.net.NetWord" >
+    insert into net_word
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="keyWord != null" >
+        key_word,
+      </if>
+      <if test="proxyMoney != null" >
+        proxy_money,
+      </if>
+      <if test="userMoney != null" >
+        user_money,
+      </if>
+      <if test="netAddress != null" >
+        net_address,
+      </if>
+      <if test="wordTeam != null" >
+        word_team,
+      </if>
+      <if test="wordEngin != null" >
+        word_engin,
+      </if>
+      <if test="wordOrder != null" >
+        word_order,
+      </if>
+      <if test="wordCustmer != null" >
+        word_custmer,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="flag != null" >
+        flag,
+      </if>
+      <if test="depId != null" >
+        dep_id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+      <if test="comfirmTime != null" >
+        comfirm_time,
+      </if>
+      <if test="targetOrder != null" >
+        target_order,
+      </if>
+      <if test="originalOrder != null" >
+        original_order,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="keyWord != null" >
+        #{keyWord,jdbcType=VARCHAR},
+      </if>
+      <if test="userMoney != null" >
+        #{userMoney,jdbcType=VARCHAR},
+      </if>
+      <if test="proxyMoney != null" >
+        #{proxyMoney,jdbcType=VARCHAR},
+      </if>
+      <if test="netAddress != null" >
+        #{netAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="wordTeam != null" >
+        #{wordTeam,jdbcType=VARCHAR},
+      </if>
+      <if test="wordEngin != null" >
+        #{wordEngin,jdbcType=VARCHAR},
+      </if>
+      <if test="wordOrder != null" >
+        #{wordOrder,jdbcType=VARCHAR},
+      </if>
+      <if test="wordCustmer != null" >
+        #{wordCustmer,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null" >
+        #{flag,jdbcType=VARCHAR},
+      </if>
+       <if test="depId != null" >
+        #{depId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=VARCHAR},
+      </if>
+      <if test="comfirmTime != null" >
+        #{comfirmTime,jdbcType=VARCHAR},
+      </if>
+      <if test="targetOrder != null" >
+        #{targetOrder,jdbcType=VARCHAR},
+      </if>
+      <if test="originalOrder != null" >
+        #{originalOrder,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="monitor.pojo.net.NetWord" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update net_word
+    <set >
+      <if test="keyWord != null" >
+        key_word = #{keyWord,jdbcType=VARCHAR},
+      </if>
+      <if test="userMoney != null and userMoney>0" >
+        user_money = #{userMoney,jdbcType=VARCHAR},
+      </if>
+      <if test="proxyMoney != null and proxyMoney>0" >
+        proxy_money = #{proxyMoney,jdbcType=VARCHAR},
+      </if>
+      <if test="netAddress != null" >
+        net_address = #{netAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="wordTeam != null" >
+        word_team = #{wordTeam,jdbcType=VARCHAR},
+      </if>
+      <if test="wordEngin != null" >
+        word_engin = #{wordEngin,jdbcType=VARCHAR},
+      </if>
+      <if test="wordOrder != null" >
+        word_order = #{wordOrder,jdbcType=VARCHAR},
+      </if>
+      <if test="wordCustmer != null" >
+        word_custmer = #{wordCustmer,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null" >
+        flag = #{flag,jdbcType=VARCHAR},
+      </if>
+      <if test="wordFlag != null" >
+        word_flag = #{wordFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="depId!=null and depId>0">
+      	dep_id=#{depId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId!=null and roleId>0">
+      	role_id=#{roleId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="monitor.pojo.net.NetWord" >
+    update net_word
+      key_word = #{keyWord,jdbcType=VARCHAR},
+      user_money = #{userMoney,jdbcType=VARCHAR},
+      proxy_money = #{proxyMoney,jdbcType=VARCHAR},
+      net_address = #{netAddress,jdbcType=VARCHAR},
+      word_team = #{wordTeam,jdbcType=VARCHAR},
+      word_engin = #{wordEngin,jdbcType=VARCHAR},
+      word_order = #{wordOrder,jdbcType=VARCHAR},
+      word_custmer = #{wordCustmer,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+   
+  <select id="selectBrokenPhoto" parameterType="monitor.pojo.net.NetWord" resultType="monitor.pojo.net.BrokenDayWord" >
+  	select sum(case when flag='优化中(排队中)' then 1 else 0 end) as pendingAudit,
+  	       sum(case when flag='优化中(处理中)' then 1 else 0 end) as pass,
+  	       sum(case when flag='优化中' then 1 else 0 end) as optimization,
+  		   sum(case when flag='不通过' then 1 else 0 end) as nopass,
+  		   count(0) as count,substr(create_time,1,8) as createTime
+    from net_word 
+    	 where substr(create_time,1,8)>#{queryObj.createTime} 
+    	 <include refid="condtionSql" />
+    	 group by substr(create_time,1,8) order by substr(create_time,1,8)
+  </select>
+  
+  <select id="selectTeam" parameterType="java.lang.String" resultType="java.lang.String">
+  	select distinct word_team from  net_word_team   where word_custmer=#{userId}
+  </select>
+  <insert id="insertWordTeam" parameterType="monitor.pojo.net.NetWordTeam">
+	insert into net_word_team(word_team,word_custmer,create_time)
+	values
+	(#{wordTeam},#{wordCustmer},#{createTime})  
+  </insert>
+  <select id="selectConditonCount" parameterType="monitor.pojo.net.PageModel" resultType="java.lang.Integer">
+  	select count(0) from net_word where 1=1
+  	<if test="queryObj.flag=='all'">
+  		and substr(flag,1,3)='优化中' or flag='停止优化'
+  	</if>
+  	<include refid="condtionSql" />
+  </select>
+  <select id="selectDebetFlag" parameterType="string" resultMap="BaseResultMap">
+  	select *  from net_word where word_flag=#{wordFlag};
+  </select>
+  
+  <select id="selectByWordUrl" resultMap="BaseResultMap" parameterType="monitor.pojo.net.NetWord" >
+    select 
+    <include refid="Base_Column_List" />
+    from net_word
+    where key_word = #{keyWord,jdbcType=INTEGER} and net_address = #{netAddress,jdbcType=INTEGER}
+  </select>
+</mapper>

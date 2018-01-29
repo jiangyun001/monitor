@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="monitor.dao.net.NetFinanceMapper" >
+
+  <resultMap id="BaseResultMap" type="monitor.pojo.net.NetFinance" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="money_amonut" property="moneyAmonut" jdbcType="DOUBLE" />
+    <result column="amonut_time" property="amonutTime" jdbcType="VARCHAR" />
+    <result column="money_balance" property="moneyBalance" jdbcType="DOUBLE" />
+    <result column="money_debit" property="moneyDebit" jdbcType="VARCHAR" />
+    <result column="debit_time" property="debitTime" jdbcType="VARCHAR" />
+    <result column="debit_reason" property="debitReason" jdbcType="VARCHAR" />
+    <result column="debit_wordId" property="debitWordId" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="money_coupon_flag" property="moneyCouponFlag" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, money_amonut,user_id, amonut_time, money_balance, money_debit, debit_time, debit_reason, 
+    debit_wordId
+  </sql>
+  
+  <sql id="userFinanceCondion">
+  	<if test="queryObj.fuserName!=null and queryObj.fuserId!=null">
+	  and (a.user_name like concat('%',#{queryObj.fuserName},'%') or a.user_id like concat('%',#{queryObj.fuserId},'%'))
+	</if>
+  	<if test="queryObj.fdepId!=null and queryObj.fdepId>0">
+	  and a.dep_id=#{queryObj.fdepId}
+	</if>
+  	<if test="queryObj.froleId!=null  and queryObj.froleId>0" >
+	  and a.role_id=#{queryObj.froleId}
+	</if>
+	<if test="queryObj.fuserName==null and queryObj.fuserId!=null">
+		and a.user_id=#{queryObj.fuserId} 
+	</if>
+  </sql>
+  
+  <sql id="pageUserCondition">
+  	<if test="queryObj.fuserId!=null">
+  		and a.user_id like concat('%',#{queryObj.fuserId},'%')
+  	</if>
+  	<if test="queryObj.fuserName!=null">
+  		and a.user_name like concat('%',#{queryObj.fuserName},'%')
+  	</if>
+  </sql>
+  
+  <sql id="pageCondition">
+  	<if test="queryObj.moneyAmonut!=null and queryObj.moneyAmonut>0">
+  	  and money_amonut=#{queryObj.moneyAmonut}
+  	</if>
+  	<if test="queryObj.amonutTime!=null">
+  		and amonut_time=#{queryObj.amonutTime}
+  	</if>
+  	<if test="queryObj.moneyBalance!=null and queryObj.moneyBalance>0">
+  		and money_balance=#{queryObj.moneyBalance}
+  	</if>	
+  	<if test="queryObj.moneyDebit!=null">
+  		and money_debit=#{queryObj.moneyDebit}
+  	</if>
+  	<if test="queryObj.debitTime!=null">
+  		and debit_time=#{queryObj.debitTime}
+  	</if>
+  	<if test="queryObj.debitReason!=null">
+  		and debit_reason=#{queryObj.debitReason}
+  	</if>
+  	<if test="queryObj.debitWordId!=null">
+  		and debit_wordId=#{queryObj.debitWordId}
+  	</if>
+  	<if test="queryObj.userId!=null">
+  		and user_id=#{queryObj.userId}
+  	</if>
+  	  
+  </sql>
+  
+  <select id="selectFinanceDetailPage" parameterType="monitor.pojo.net.PageModel" resultType="monitor.pojo.net.NetFinacelUser">
+  	select 
+  	 	 b.id as uid,b.money_amonut as moneyAmonut,b.user_id as userId,
+  		 b.amonut_time as amonutTime,b.money_balance as moneyBalance,b.money_debit as moneyDebit,
+  		 b.debit_time as debitTime, b.debit_reason as debitReason,b.debit_wordId as debitWordId,a.id as id,
+	  	 a.user_id as fuserId,a.dep_id as fdepId,a.role_id as froleId,a.dep_name as fdepname,
+  		 a.role_name as frolename,a.user_name as fusername
+  	 from net_user a left join net_finance b on a.user_id=b.user_id
+  	 	where 1=1
+  	   <include refid="pageUserCondition"></include>
+  	 <if test="pageNumber != null and  pageSize!= null">
+    	limit #{startRow},#{pageSize}
+ 	</if>
+  </select>
+  
+  <select id="selectFinanceDetailPageCount" parameterType="monitor.pojo.net.PageModel" resultType="java.lang.Integer">
+  	select 
+  	 	count(0)
+  	 from net_user a left join net_finance b on a.user_id=b.user_id
+  		 where 1=1
+  	  <include refid="pageUserCondition"></include>
+  </select>
+  
+  
+<!--   List<NetFinance> selectFinanceDetailPage(PageModel<NetFinance> pageMode); -->
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from net_finance
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <select id="selectCountPage" parameterType="monitor.pojo.net.PageModel" resultType="java.lang.Integer">
+  	select count(0) from net_finance where 1=1 
+  	<include refid="pageCondition"></include>
+  </select>
+
+  <select id="selectFinancePage" parameterType="monitor.pojo.net.PageModel" resultMap="BaseResultMap">
+  	select <include refid="Base_Column_List"></include> from net_finance where 1=1 
+  	<include refid="pageCondition"></include>
+  	<if test="pageNumber != null and  pageSize!= null">
+    	limit #{startRow},#{pageSize}
+ 	</if>
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from net_finance
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <insert id="insert" parameterType="monitor.pojo.net.NetFinance" >
+    insert into net_finance (id, money_amonut, amonut_time, 
+      money_balance, money_debit, debit_time, 
+      debit_reason, debit_wordId)
+    values (#{id,jdbcType=INTEGER}, #{moneyAmonut,jdbcType=DOUBLE}, #{amonutTime,jdbcType=VARCHAR}, 
+      #{moneyBalance,jdbcType=DOUBLE}, #{moneyDebit,jdbcType=VARCHAR}, #{debitTime,jdbcType=VARCHAR}, 
+      #{debitReason,jdbcType=VARCHAR}, #{debitWordId,jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="insertSelective" parameterType="monitor.pojo.net.NetFinance" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    insert into net_finance
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="moneyAmonut != null" >
+        money_amonut,
+      </if>
+      <if test="amonutTime != null" >
+        amonut_time,
+      </if>
+      <if test="moneyBalance != null" >
+        money_balance,
+      </if>
+      <if test="moneyDebit != null" >
+        money_debit,
+      </if>
+      <if test="debitTime != null" >
+        debit_time,
+      </if>
+      <if test="debitReason != null" >
+        debit_reason,
+      </if>
+      <if test="debitWordId != null" >
+        debit_wordId,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="depId != null" >
+        dep_id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+      <if test="balanceTime != null" >
+        balance_time,
+      </if>
+      <if test="moneyCoupon != null" >
+        money_coupon,
+      </if>
+      <if test="moneyCouponFlag != null" >
+        money_coupon_flag,
+      </if>
+    </trim>
+    
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="moneyAmonut != null" >
+        #{moneyAmonut,jdbcType=DOUBLE},
+      </if>
+      <if test="amonutTime != null" >
+        #{amonutTime,jdbcType=VARCHAR},
+      </if>
+      <if test="moneyBalance != null" >
+        #{moneyBalance,jdbcType=DOUBLE},
+      </if>
+      <if test="moneyDebit != null" >
+        #{moneyDebit,jdbcType=VARCHAR},
+      </if>
+      <if test="debitTime != null" >
+        #{debitTime,jdbcType=VARCHAR},
+      </if>
+      <if test="debitReason != null" >
+        #{debitReason,jdbcType=VARCHAR},
+      </if>
+      <if test="debitWordId != null" >
+        #{debitWordId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="depId != null" >
+        #{depId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=VARCHAR},
+      </if>
+      <if test="balanceTime != null" >
+        #{balanceTime,jdbcType=VARCHAR},
+      </if>
+      <if test="moneyCoupon != null" >
+        #{moneyCoupon,jdbcType=VARCHAR},
+      </if>
+      <if test="moneyCouponFlag != null" >
+        #{moneyCouponFlag,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="monitor.pojo.net.NetFinance" >
+    update net_finance
+    <set >
+      <if test="moneyAmonut != null" >
+        money_amonut = #{moneyAmonut,jdbcType=DOUBLE},
+      </if>
+      <if test="amonutTime != null" >
+        amonut_time = #{amonutTime,jdbcType=VARCHAR},
+      </if>
+      <if test="moneyBalance != null" >
+        money_balance = #{moneyBalance,jdbcType=DOUBLE},
+      </if>
+      <if test="moneyDebit != null" >
+        money_debit = #{moneyDebit,jdbcType=VARCHAR},
+      </if>
+      <if test="debitTime != null" >
+        debit_time = #{debitTime,jdbcType=VARCHAR},
+      </if>
+      <if test="debitReason != null" >
+        debit_reason = #{debitReason,jdbcType=VARCHAR},
+      </if>
+      <if test="debitWordId != null" >
+        debit_wordId = #{debitWordId,jdbcType=VARCHAR},
+      </if>
+       <if test="userId != null" >
+        user_id = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="depId != null" >
+        dep_id = #{depId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null" >
+        role_id = # {roleId,jdbcType=VARCHAR},
+      </if>
+      
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="monitor.pojo.net.NetFinance" >
+    update net_finance
+    set money_amonut = #{moneyAmonut,jdbcType=DOUBLE},
+      amonut_time = #{amonutTime,jdbcType=VARCHAR},
+      money_balance = #{moneyBalance,jdbcType=DOUBLE},
+      money_debit = #{moneyDebit,jdbcType=VARCHAR},
+      debit_time = #{debitTime,jdbcType=VARCHAR},
+      debit_reason = #{debitReason,jdbcType=VARCHAR},
+      debit_wordId = #{debitWordId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+   
+   <select id="getNewMoneyAmount" parameterType="String" resultType="monitor.pojo.net.NetMoneyBlance">
+   	  select 
+   	  	ifnull(max(money_balance),0) as moneyBlance,ifnull(max(money_coupon),0) as moneyCoupon
+   	  from net_finance 
+   	  	where id =(select max(id) from net_finance where user_id=#{userId} group by user_id);
+   </select>
+   
+   <select id="selectUserFinancePageList" parameterType="monitor.pojo.net.PageModel" resultType="monitor.pojo.net.NetFinacelUser">
+  	 	select b.id as uid,b.money_amonut as moneyAmonut,b.user_id as userId, 
+			b.amonut_time as amonutTime,b.money_balance as moneyBalance,
+			b.money_debit as moneyDebit, b.debit_time as debitTime, 
+			b.debit_reason as debitReason,b.debit_wordId as debitWordId,
+			a.id as id, a.user_id as fuserId,a.dep_id as fdepId,
+			a.role_id as froleId,a.dep_name as fdepname,a.user_frozen as userFrozen,
+ 			a.role_name as frolename,a.user_name as fusername ,ifnull(b.dateFee,0) as dateFee,ifnull(money_coupon,0) as moneyCoupon,money_coupon_flag as moneyCouponFlag
+   		from net_user a left join 
+   			(
+   			select *  from (
+					select * from net_finance a,(select user_id as userCard,max(id) as maxid from net_finance group by userCard) b
+				where a.user_id=b.userCard and a.id=b.maxid) c
+		left join (
+					select user_id as id_user,ifnull(sum(money_debit),0) as dateFee from net_finance where substr(debit_time,1,8)=(select replace(curdate(),'-','')) group by user_id
+	 		 		) d on c.user_id=d.id_user
+  			) as b  		
+		on a.user_id=b.user_id where 1=1
+   		<include refid="userFinanceCondion"/>
+   		<if test="pageNumber != null and  pageSize!= null">
+    		limit #{startRow},#{pageSize}
+ 		</if>
+   </select>
+   <select id="selectUserFinancePageListCount" parameterType="monitor.pojo.net.PageModel" resultType="java.lang.Integer">
+  	 		select count(0)
+   		from net_user a left join 
+   			(
+   			select *  from (
+					select * from net_finance a,(select user_id as userCard,max(id) as maxid from net_finance group by userCard) b
+				where a.user_id=b.userCard and a.id=b.maxid) c
+		left join (
+					select user_id as id_user,ifnull(sum(money_debit),0) as dateFee from net_finance where substr(debit_time,1,8)=(select replace(curdate(),'-','')) group by user_id
+	 		 		) d on c.user_id=d.id_user
+  			) as b
+		on a.user_id=b.user_id where 1=1
+   		<include refid="userFinanceCondion"></include>
+   </select>
+</mapper>

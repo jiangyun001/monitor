@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="monitor.dao.net.FirstPageMapper">
+  <select id="callFirstPage" parameterType="monitor.pojo.user.User" statementType="CALLABLE" resultType="monitor.pojo.net.FirstPage">
+  	call proc_firstPage(#{depId},#{roleId},#{userId});
+  </select>
+  
+</mapper>
+
+
+

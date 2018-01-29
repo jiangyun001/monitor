@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="monitor.dao.net.FinacelUserAllMapper">
+  <select id="callProcallUserTitle" parameterType="monitor.pojo.user.User" statementType="CALLABLE" resultType="monitor.pojo.net.FinacelUserAll">
+  	call proc_allUserTitle(#{depId},#{roleId},#{userId},#{drag});
+  </select>
+</mapper>
+
+
+	

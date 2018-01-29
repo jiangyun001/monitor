@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="monitor.dao.net.NetInfoMonitorMapper">
+  
+  <resultMap type="monitor.pojo.net.NetInfoMonitor" id="listNetInfo">
+  	<id column="id" property="id"/>
+  	<result column="href" property="href"/>
+  	<result column="emp_name" property="empName"/>
+  	<result column="emp_emai" property="empEmai"/>
+  	<result column="num" property="num"/>
+  	<result column="flag" property="flag"/>
+  	<result column="err_num" property="errNum"/>
+  	<result column="create_time" property="createTime"/>
+  </resultMap>
+	
+	
+  <select id="selectNetInfo" parameterType="String" resultMap="listNetInfo">
+  	select href,emp_emai,emp_name,num,count(0) as total from  net_info_monitor  where 1=1
+    <if test="href !=null and href!=''">
+    	and href=#{href}
+    </if>
+    group by href,emp_emai,emp_name,num
+  </select>
+  
+  	<select id="selectNetInfoErr" parameterType="String" resultType="java.lang.Integer">
+	  	select max(err_num) from net_info_monitor  where 1=1
+  	 <if test="href !=null and href!=''">
+    	and href=#{href}
+    </if>
+  </select>
+  
+  	<select id="selectNetInfoFlag" parameterType="String" resultMap="listNetInfo">
+	  	select * from net_info_monitor where flag=#{flag}
+  </select>
+  
+  
+  
+  <insert id="insertNetInfo" parameterType="monitor.pojo.net.NetInfoMonitor">
+  	insert into net_info_monitor (href,create_time,emp_name,emp_emai,num,flag,err_num) values
+  	 (#{href},#{createTime},#{empName},#{empEmai},#{num},#{flag},#{errNum})
+  </insert>
+  
+  <update id="updateNetInfo" parameterType="monitor.pojo.net.NetInfoMonitor">
+  	update net_info_monitor 
+  	<trim prefix="set" suffixOverrides=",">
+	  	<if test="empName!=null">emp_name=#{empName},</if>
+	  	<if test="empEmai!=null">emp_emai=#{empEmai},</if>
+	  	<if test="num!=null">num=#{num},</if>
+	  	<if test="flag!=null">flag=#{flag},</if>
+	  	<if test="errNum!=null">err_num=#{errNum},</if>
+	  	<if test="createTime!=null">create_time=#{createTime},</if>
+  	</trim>
+  	<!-- set num=#{num},emp_name=#{empName},emp_emai=#{empEmai} where href=#{href} -->
+	<where>
+		 href=#{href} and flag='Y'
+	</where>
+  </update>
+  
+  <delete id="deleteNetInfo" parameterType="string">
+  	delete from net_info where href=#{href}
+  </delete>
+  
+  
+  
+  
+  
+  
+</mapper>

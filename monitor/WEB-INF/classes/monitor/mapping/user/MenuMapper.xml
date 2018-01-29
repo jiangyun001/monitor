@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="monitor.dao.user.MenuMapper">
+	<select id="selectMenu" resultType="monitor.pojo.user.Menu">
+	
+		select id,menu_id as menuId,menu_name as menuName,parent_id as parentId,parent_name as parentName,url from net_menu where menu_id in 
+		<foreach collection="list" item="menu" index="index" open="(" separator="," close=")">
+			#{menu.menuId}
+		</foreach>
+	</select>
+
+</mapper>

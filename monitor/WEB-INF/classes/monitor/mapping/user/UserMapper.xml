@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="monitor.dao.user.UserMapper">
+	<sql id="Base_Column_List" >
+   		id,user_id as userId,dep_id as depId,role_id as roleId,
+		user_name as userName,user_email as userEmail,
+		user_mobile as userMobile,password,
+		dep_name as depName,role_name as roleName,user_qq as userQq,user_wechat as userWechat,user_login_time as userLoginTime,
+ 		user_login_number as userLoginNumber,user_createtime as userCreatetime,user_frozen as userFrozen
+   </sql>
+	
+	<select id="getUser" resultType="monitor.pojo.user.User">
+		select <include refid="Base_Column_List"/>
+		from net_user where user_id=#{userId}
+	</select>
+
+	<select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="monitor.pojo.user.User">
+		select <include refid="Base_Column_List"/>
+		from net_user where id=#{id}
+	</select>
+	
+	<select id="selectUserCombox" parameterType="java.lang.Integer" resultType="monitor.pojo.user.User">
+		select <include refid="Base_Column_List"/>
+		from net_user where 1=1
+		<if test="deptId!=1 and deptId>0">
+		  and dep_id=#{deptId}
+		</if>
+		order by dep_id asc;
+	</select>
+	
+	
+	<!-- public List<User> selectUserTree(int dep); -->
+	
+	<select id="selectCountUserPage"  parameterType="monitor.pojo.net.PageModel" resultType="java.lang.Integer">
+		select count(0) from net_user where 1=1
+			<if test="queryObj.depId!=1">
+			   and	dep_id=#{queryObj.depId}
+			</if>
+			<if test="queryObj.depId==1 and queryObj.flagsub!='y'.toString()">
+			    and role_id=#{queryObj.roleId}
+			</if>
+			<if test="queryObj.userId!=null">
+			   and	user_id like concat('%',#{queryObj.userId},'%')
+			</if>
+			
+	</select>
+	
+	<select id="selectUserPage"  parameterType="monitor.pojo.net.PageModel" resultType="monitor.pojo.user.User">
+		select <include refid="Base_Column_List"/> from net_user where 1=1
+			<if test="queryObj.depId!=1">
+				and dep_id=#{queryObj.depId}
+			</if>
+			<if test="queryObj.depId==1 and queryObj.flagsub!='y'.toString()">
+			    and role_id=#{queryObj.roleId}
+			</if>
+			<if test="queryObj.userId!=null">
+			   and	user_id like concat('%',#{queryObj.userId},'%')
+			</if>
+			<if test="queryObj.roleId==2">
+			  and user_id=#{queryObj.userId}
+			</if>
+			
+			<if test="pageNumber != null and  pageSize!= null">
+    		    limit #{startRow},#{pageSize}
+     	 	</if>
+	</select>
+	
+	<select id="selectLeader" parameterType="java.lang.Integer" resultType="monitor.pojo.user.User">
+		select distinct <include refid="Base_Column_List"/> from net_user where dep_id=#{deptId} and role_id='1'
+	</select>
+	
+	<insert id="insertUser"  parameterType="monitor.pojo.user.User">
+		insert into net_user (user_id,dep_id,role_id,dep_name,role_name,user_name,user_email,user_mobile,user_qq,user_wechat,user_frozen,password) values 
+		(#{userId},#{depId},#{roleId},#{depName},#{roleName},#{userName},#{userEmail},#{userMobile},#{userQq},#{userWechat},#{userFrozen},#{password})
+	</insert>
+	
+	<update id="updateUser" parameterType="monitor.pojo.user.User">
+		update net_user set
+		dep_id=#{depId},role_id=#{roleId},dep_name=#{depName},role_name=#{roleName},user_name=#{userName},user_email=#{userEmail},user_mobile=#{userMobile},password=#{password}
+		where user_id=#{userId}
+	</update>	
+	
+	<update id="updateUserSelected" parameterType="monitor.pojo.user.User">
+		update net_user 
+	  <set >
+		<if test="depId != null and depId!=0" >
+	    	dep_Id = #{depId},
+		</if>
+		<if test="roleId != null and roleId!=0 " >
+	    	role_id = #{roleId},
+		</if>
+		<if test="depName != null" >
+	    	dep_name = #{depName},
+		</if>
+		<if test="roleName != null" >
+	    	role_name = #{roleName},
+		</if>
+		<if test="userName != null" >
+	    	user_name = #{userName},
+		</if>
+		<if test="userEmail != null" >
+	    	user_email = #{userEmail},
+		</if>
+		<if test="userMobile != null" >
+	    	user_mobile = #{userMobile},
+		</if>
+		<if test="password != null" >
+	    	password = #{password},
+		</if>
+		<if test="userQq != null" >
+	    	user_qq = #{userQq},
+		</if>
+		<if test="userWechat != null" >
+	    	user_wechat = #{userWechat},
+		</if>
+		<if test="userLoginTime != null" >
+	    	user_login_time = #{userLoginTime},
+		</if>
+		<if test="userLoginNumber != null" >
+	    	user_login_number = #{userLoginNumber},
+		</if>
+		<if test="userFrozen != null" >
+	    	user_frozen = #{userFrozen},
+		</if>
+		</set>
+		where 1=1
+		<if test="userId!= null">
+     	  and user_id=#{userId}
+		</if> 
+		<if test="id!=null and id>0" >
+     	  and id=#{id}
+		</if> 
+	</update>	
+	
+	<delete id="deleteUser" parameterType="java.lang.Integer">
+		delete from  net_user where id=#{id}
+	</delete>
+	
+	
+</mapper>
